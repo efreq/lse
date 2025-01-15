@@ -98,7 +98,7 @@ int lse_deserialize_mii(MiiData* mii, const uint8_t* miiBuf, bool validate)
 	mii->eye_details.yscale = eyeBuf>>13 & 7;
 	mii->eye_details.rotation = eyeBuf>>16 & 31;
 	mii->eye_details.xspacing = eyeBuf>>21 & 15;
-	mii->eye_details.yposition = eyeBuf>>25 >> 31;
+	mii->eye_details.yposition = eyeBuf>>25 & 31;
 
 	uint32_t eyebrowBuf = (uint32_t)miiBuf[56] | (uint32_t)miiBuf[57]<<8 | (uint32_t)miiBuf[58]<<16 | (uint32_t)miiBuf[59]<<24;
 	mii->eyebrow_details.style = eyebrowBuf & 31;
@@ -121,7 +121,7 @@ int lse_deserialize_mii(MiiData* mii, const uint8_t* miiBuf, bool validate)
 	mii->mouth_details.color = mouthBuf>>6 & 7;
 	mii->mouth_details.scale = mouthBuf>>9 & 15;
 	mii->mouth_details.yscale = mouthBuf>>13 & 7;
-	mii->mustache_details.mouth_yposition = mouthBuf>>16 & 15;
+	mii->mustache_details.mouth_yposition = mouthBuf>>16 & 31;
 	mii->mustache_details.mustach_style = mouthBuf>>21 & 7;
 	//pad
 

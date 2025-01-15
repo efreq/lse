@@ -35,7 +35,7 @@ int lse_serialize_mii(const MiiData* mii, uint8_t* miiBuf)
 #else
 
 	//mii data
-	miiBuf[0] = mii->magic;
+	miiBuf[0] = mii->magic; //3: valid mii, 0: empty mii
 	miiBuf[1] = (mii->mii_options.allow_copying & 1) | (mii->mii_options.is_private_name & 1)<<1 | 
 		(mii->mii_options.region_lock & 3)<<2 | (mii->mii_options.char_set & 3)<<4;
 	miiBuf[2] = (mii->mii_pos.page_index & 15) | (mii->mii_pos.slot_index & 15)<<4;
@@ -50,81 +50,95 @@ int lse_serialize_mii(const MiiData* mii, uint8_t* miiBuf)
 	miiBuf[23] = mii->pad[1];
 	miiBuf[24] = (mii->mii_details.sex & 1) | (mii->mii_details.bday_month & 15)<<1 | (mii->mii_details.bday_day & 7)<<5;
 	miiBuf[25] = (mii->mii_details.bday_day>>3 & 3) | (mii->mii_details.shirt_color & 15)<<2 | (mii->mii_details.favorite & 1)<<6;
-	/*
-	//utf16 little
-	for (size_t i = 0; i < 10; i++)
-		mii->mii_name[i] = (uint16_t)miiBuf[26+(i*2)] | (uint16_t)miiBuf[27+(i*2)]<<8;
-	
-	mii->height = miiBuf[46];
-	mii->width = miiBuf[47];
-	mii->face_style.disable_sharing = miiBuf[48] & 1; 
-	mii->face_style.shape = miiBuf[48]>>1 & 15;
-	mii->face_style.skinColor = miiBuf[48]>>5 & 7;
-	mii->face_details.wrinkles = miiBuf[49] & 15;
-	mii->face_details.makeup = miiBuf[49]>>4 & 15;
-	mii->hair_style = miiBuf[50];
-	mii->hair_details.color = miiBuf[51] & 7;
-	mii->hair_details.flip = miiBuf[51]>>3 & 1;
-
-	uint32_t eyeBuf = (uint32_t)miiBuf[52] | (uint32_t)miiBuf[53]<<8 | (uint32_t)miiBuf[54]<<16 | (uint32_t)miiBuf[55]<<24;
-	mii->eye_details.style = eyeBuf & 63;
-	mii->eye_details.color = eyeBuf>>6 & 7;
-	mii->eye_details.scale = eyeBuf>>9 & 15;
-	mii->eye_details.yscale = eyeBuf>>13 & 7;
-	mii->eye_details.rotation = eyeBuf>>16 & 31;
-	mii->eye_details.xspacing = eyeBuf>>21 & 15;
-	mii->eye_details.yposition = eyeBuf>>25 >> 31;
-
-	uint32_t eyebrowBuf = (uint32_t)miiBuf[56] | (uint32_t)miiBuf[57]<<8 | (uint32_t)miiBuf[58]<<16 | (uint32_t)miiBuf[59]<<24;
-	mii->eyebrow_details.style = eyebrowBuf & 31;
-	mii->eyebrow_details.color = eyebrowBuf>>5 & 7;
-	mii->eyebrow_details.scale = eyebrowBuf>>8 & 15;
-	mii->eyebrow_details.yscale = eyebrowBuf>>12 & 7;
-	mii->eyebrow_details.pad = eyebrowBuf>>15 & 1; 		//unnecess
-	mii->eyebrow_details.rotation = eyebrowBuf>>16 & 31;
-	mii->eyebrow_details.xspacing = eyebrowBuf>>21 & 15;
-	mii->eyebrow_details.yposition = eyebrowBuf>>25 & 31;
-
-	uint16_t noseBuf = (uint16_t)miiBuf[60] | (uint16_t)miiBuf[61]<<8;
-	mii->nose_details.style = noseBuf & 31;
-	mii->nose_details.scale = noseBuf>>5 & 15;
-	mii->nose_details.yposition = noseBuf>>9 & 31;
-
-	//mouth and mustache
-	uint32_t mouthBuf = (uint32_t)miiBuf[62] | (uint32_t)miiBuf[63]<<8 | (uint32_t)miiBuf[64]<<16 | (uint32_t)miiBuf[65]<<24;
-	mii->mouth_details.style = mouthBuf & 63;
-	mii->mouth_details.color = mouthBuf>>6 & 7;
-	mii->mouth_details.scale = mouthBuf>>9 & 15;
-	mii->mouth_details.yscale = mouthBuf>>13 & 7;
-	mii->mustache_details.mouth_yposition = mouthBuf>>16 & 15;
-	mii->mustache_details.mustach_style = mouthBuf>>21 & 7;
-	//pad
-
-	uint16_t beardBuf = (uint16_t)miiBuf[66] | (uint16_t)miiBuf[67]<<8;
-	mii->beard_details.style = beardBuf & 7;
-	mii->beard_details.color = beardBuf>>3 & 7;
-	mii->beard_details.scale = beardBuf>>6 & 15;
-	mii->beard_details.ypos = beardBuf>>10 & 31;
-
-	uint16_t glassesBuf = (uint16_t)miiBuf[68] | (uint16_t)miiBuf[69]<<8;
-	mii->glasses_details.style = glassesBuf & 15;
-	mii->glasses_details.color = glassesBuf>>4 & 7;
-	mii->glasses_details.scale = glassesBuf>>7 & 15;
-	mii->glasses_details.ypos = glassesBuf>>11 & 31;
-
-	uint16_t moleBuf = (uint16_t)miiBuf[70] | (uint16_t)miiBuf[71]<<8;
-	mii->mole_details.enable = moleBuf & 1;
-	mii->mole_details.scale = moleBuf>>1 & 15; //wrong number of bits on MIiData??
-	mii->mole_details.xpos = moleBuf>>5 & 31;
-	mii->mole_details.ypos = moleBuf>>10 & 31;
 	
 	//utf16 little
 	for (size_t i = 0; i < 10; i++)
-		mii->author_name[i] = (uint16_t)miiBuf[72+(i*2)] | (uint16_t)miiBuf[73+(i*2)]<<8;
-	*/
+	{
+		miiBuf[26+(i*2)] = mii->mii_name[i] & 0xFF;
+		miiBuf[27+(i*2)] = mii->mii_name[i]>>8 & 0xFF;
+	}
+	
+	miiBuf[46] = mii->height;
+	miiBuf[47] = mii->width;
+	miiBuf[48] = (mii->face_style.disable_sharing & 1) |  (mii->face_style.shape & 15)<<1 | (mii->face_style.skinColor & 7)<<5;
+	miiBuf[49] = (mii->face_details.wrinkles & 15) | (mii->face_details.makeup & 15)<<4;
+	miiBuf[50] = mii->hair_style;
+	miiBuf[51] = (mii->hair_details.color & 7) | (mii->hair_details.flip & 1)<<3;
+
+	uint32_t eyeBuf = (mii->eye_details.style & 63) 
+		| (mii->eye_details.color & 7)<<6
+		| (mii->eye_details.scale & 15)<<9
+		| (mii->eye_details.yscale & 7)<<13
+		| (mii->eye_details.rotation & 31)<<16
+		| (mii->eye_details.xspacing & 15)<<21
+		| (mii->eye_details.yposition & 31)<<25; 
+	miiBuf[52] = eyeBuf & 0xFF;
+	miiBuf[53] = eyeBuf>>8 & 0xFF;
+	miiBuf[54] = eyeBuf>>16 & 0xFF;
+	miiBuf[55] = eyeBuf>>24 & 0xFF;
+
+	uint32_t eyebrowBuf = (mii->eyebrow_details.style & 31) 
+		| (mii->eyebrow_details.color & 7)<<5
+		| (mii->eyebrow_details.scale & 15)<<8
+		| (mii->eyebrow_details.yscale & 7)<<12
+		| (mii->eyebrow_details.pad & 1)<<15		//unnecess
+		| (mii->eyebrow_details.rotation & 31)<<16	//mask is 15?(4 bit)
+		| (mii->eyebrow_details.xspacing & 15)<<21
+		| (mii->eyebrow_details.yposition & 31)<<25; 
+	miiBuf[56] = eyebrowBuf & 0xFF;
+	miiBuf[57] = eyebrowBuf>>8 & 0xFF;
+	miiBuf[58] = eyebrowBuf>>16 & 0xFF;
+	miiBuf[59] = eyebrowBuf>>24 & 0xFF;
+
+	uint16_t noseBuf = (mii->nose_details.style & 31) 
+		| (mii->nose_details.scale & 15)<<5
+		| (mii->nose_details.yposition & 31)<<9; 
+	miiBuf[60] = noseBuf & 0xFF;
+	miiBuf[61] = noseBuf>>8 & 0xFF;
+
+	uint32_t mouthBuf = (mii->mouth_details.style & 63) 
+		| (mii->mouth_details.color & 7)<<6
+		| (mii->mouth_details.scale & 15)<<9
+		| (mii->mouth_details.yscale & 7)<<13
+		| (mii->mustache_details.mouth_yposition & 31)<<16
+		| (mii->mustache_details.mustach_style & 15)<<21; 
+		//padding unnecess for integer
+	miiBuf[62] = mouthBuf & 0xFF;
+	miiBuf[63] = mouthBuf>>8 & 0xFF;
+	miiBuf[64] = mouthBuf>>16 & 0xFF;
+	miiBuf[65] = mouthBuf>>24 & 0xFF;
+
+	uint16_t beardBuf = (mii->beard_details.style & 7) 
+		| (mii->beard_details.color & 7)<<3
+		| (mii->beard_details.scale & 15)<<6 
+		| (mii->beard_details.ypos & 31)<<10;
+	miiBuf[66] = beardBuf & 0xFF;
+	miiBuf[67] = beardBuf>>8 & 0xFF;
+
+	uint16_t glassesBuf = (mii->glasses_details.style & 15) 
+		| (mii->glasses_details.color & 7)<<4
+		| (mii->glasses_details.scale & 15)<<7 
+		| (mii->glasses_details.ypos & 31)<<11;
+	miiBuf[68] = glassesBuf & 0xFF;
+	miiBuf[69] = glassesBuf>>8 & 0xFF;
+
+	uint16_t moleBuf = (mii->mole_details.enable & 1) 
+		| (mii->mole_details.scale & 15)<<1
+		| (mii->mole_details.xpos & 31)<<5 			//wrong number of bits on MiiData??
+		| (mii->mole_details.ypos & 31)<<10;
+	miiBuf[70] = moleBuf & 0xFF;
+	miiBuf[71] = moleBuf>>8 & 0xFF;
+	
+	//utf16 little
+	for (size_t i = 0; i < 10; i++)
+	{
+		miiBuf[72+(i*2)] = mii->author_name[i] & 0xFF;
+		miiBuf[73+(i*2)] = mii->author_name[i]>>8 & 0xFF;
+	}
+
 #endif
 
-	//padding, crc16
+	//padding, crc16(big endian)
 	miiBuf[0x5C] = miiBuf[0x5D] = 0;
 	uint16_t crc16 = lse_crc16(miiBuf, 0x5E);
 	miiBuf[0x5E] = crc16>>8 & 0xFF;
