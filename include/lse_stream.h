@@ -14,17 +14,20 @@ typedef struct
 static inline int lse_streamW_init(lse_StreamW* stream)
 {
 	stream->dst = malloc(100);
+	memset(stream->dst, 0, 100);
 	stream->byte = 0;
 	stream->size = 100;
 	return stream->dst != NULL;
 }
 
-static inline int lse_streamW_realloc(lse_StreamW* stream, int32_t nsize)
+static inline int lse_streamW_realloc(lse_StreamW* stream, uint32_t nsize)
 {
 	uint8_t* tmp = realloc(stream->dst, nsize);
 	if (tmp)
 	{
 		stream->dst = tmp;
+		if ((int32_t)nsize - (int32_t)stream->size > 0)
+			memset(&stream->dst[stream->size], 0, nsize - stream->size);
 		stream->size = nsize;
 		return 1;
 	}

@@ -72,7 +72,7 @@ int lse_deserialize_mii(MiiData* mii, const uint8_t* miiBuf, bool validate)
 	mii->pad[1] = miiBuf[23]; 
 	mii->mii_details.sex = miiBuf[24] & 1;
 	mii->mii_details.bday_month = miiBuf[24]>>1 & 15;
-	mii->mii_details.bday_day = (miiBuf[24]>>5 & 7) | (miiBuf[25] & 3); //(bit 5 - 9)
+	mii->mii_details.bday_day = (miiBuf[24]>>5 & 7) | (miiBuf[25] & 3)<<3; //(bit 5 - 9)
 	mii->mii_details.shirt_color = miiBuf[25]>>2 & 15;
 	mii->mii_details.favorite = miiBuf[25]>>6 & 1;
 
@@ -259,9 +259,7 @@ int lse_read_file(lse_FILE_t* file, lse_StreamR* stream, bool validate)
 	file->mbox_starcoin = header[12] | header[13]<<8;
 
 	file->pictures = header[18] | header[19]<<8;
-	file->progress = header[20];
-	file->world_progress = header[21] | header[22]<<8;
-
+	file->progress = (uint32_t)header[20] | (uint32_t)header[21]<<8 | (uint32_t)header[22]<<16 | (uint32_t)header[23]<<24;
 //mii
 	if ((res = lse_deserialize_mii(&file->mii, &header[24], validate)) != LSE_OK)
 		return res;

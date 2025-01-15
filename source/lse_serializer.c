@@ -1,4 +1,5 @@
 #include <lse.h>
+#include <assert.h>
 #include <lse_stream.h>
 
 int lse_write(const char* filename, const lse_DATA_t* data)
@@ -44,7 +45,7 @@ int lse_serialize_mii(const MiiData* mii, uint8_t* miiBuf)
 		miiBuf[i+4] = (mii->system_id>>(i*8) & 0xFF);
 //big endian
 	for (uint8_t i = 0; i < 4; i++)
-		miiBuf[i+12] = (mii->system_id>>((3-i)*8) & 0xFF);
+		miiBuf[i+12] = (mii->mii_id>>((3-i)*8) & 0xFF);
 	memcpy(&miiBuf[16], mii->mac, 6);
 	miiBuf[22] = mii->pad[0]; //padding 0
 	miiBuf[23] = mii->pad[1];
@@ -179,6 +180,162 @@ int lse_write_rivals(const lse_DATA_t* data, lse_StreamW* stream)
 	return LSE_OK;
 }
 
+
+int lse_write_stage_normal(const lse_normal_stage_t* stage, lse_StreamW* stream)
+{
+	uint8_t stage_buf[0x0C] = {0};
+
+	stage_buf[0] = stage->cleared;
+	stage_buf[1] = stage->status;
+
+	stage_buf[5] = stage->misscount & 0xFF;
+	stage_buf[6] = stage->misscount>>8 & 0xFF;
+	stage_buf[7] = stage->misscount>>16 & 0xFF;
+	stage_buf[8] = stage->misscount>>24 & 0xFF;
+	stage_buf[9] = stage->flagheight;
+	stage_buf[10] = stage->time & 0xFF;
+	stage_buf[11] = stage->time>>8 & 0xFF;
+
+	if (!lse_streamW_write(stream, stage_buf, sizeof(stage_buf)))
+		return LSE_STREAM_ERROR;
+
+	return LSE_OK;
+}
+
+int lse_write_mystery_box(const lse_mystery_box_t* stage, lse_StreamW* stream)
+{
+	uint8_t stage_buf[0x75] = {0};
+
+	stage_buf[0] = stage->cleared;
+	stage_buf[1] = stage->status;
+
+	stage_buf[5] = stage->misscount & 0xFF;
+	stage_buf[6] = stage->misscount>>8 & 0xFF;
+	stage_buf[7] = stage->misscount>>16 & 0xFF;
+	stage_buf[8] = stage->misscount>>24 & 0xFF;
+
+	stage_buf[0x6A] = stage->nextbox;
+	
+	stage_buf[0x6C] = stage->isopen;
+	stage_buf[0x6D] = stage->lastopened & 0xFF;
+	stage_buf[0x6E] = stage->lastopened>>8 & 0xFF;
+	stage_buf[0x6F] = stage->lastopened>>16 & 0xFF;
+	stage_buf[0x70] = stage->lastopened>>24 & 0xFF;
+
+	if (!lse_streamW_write(stream, stage_buf, sizeof(stage_buf)))
+		return LSE_STREAM_ERROR;
+
+	return LSE_OK;
+}
+
+int lse_write_toad_house(const lse_toad_house_t* stage, lse_StreamW* stream)
+{
+	uint8_t stage_buf[0x13] = {0};
+
+	stage_buf[0] = stage->cleared;
+	stage_buf[1] = stage->status;
+	
+	stage_buf[10] = stage->isopen;
+	stage_buf[11] = stage->lastopened & 0xFF;
+	stage_buf[12] = stage->lastopened>>8 & 0xFF;
+	stage_buf[13] = stage->lastopened>>16 & 0xFF;
+	stage_buf[14] = stage->lastopened>>24 & 0xFF;
+
+	if (!lse_streamW_write(stream, stage_buf, sizeof(stage_buf)))
+		return LSE_STREAM_ERROR;
+
+	return LSE_OK;
+}
+
+int lse_write_file(const lse_FILE_t* file, lse_StreamW* stream)
+{
+	int res;
+	uint8_t header[0x80] = {0}; //[0 - (Begin Of Stages(variable element))]
+
+	header[0] = file->coin;
+	
+	header[2] = file->powerup;
+	header[3] = file->pos;
+	header[4] = file->stockitem;
+	
+	header[9] = file->isLuigi;
+	header[10] = file->mbox_visitedcount;
+	header[11] = file->mbox_lastbox;
+	header[12] = file->mbox_starcoin & 0xFF;
+	header[13] = file->mbox_starcoin>>8 & 0xFF;
+
+	header[18] = file->pictures & 0xFF;
+	header[19] = file->pictures>>8 & 0xFF;
+	header[20] = file->progress & 0xFF;
+	header[21] = file->progress>>8 & 0xFF;
+	header[22] = file->progress>>16 & 0xFF;
+	header[23] = file->progress>>24 & 0xFF;
+
+//mii
+	if ((res = lse_serialize_mii(&file->mii, &header[24])) != LSE_OK)
+		return res;
+
+	header[120] = file->lastsaved & 0xFF;
+	header[121] = file->lastsaved>>8 & 0xFF;
+	header[122] = file->lastsaved>>16 & 0xFF;
+	header[123] = file->lastsaved>>24 & 0xFF;
+	//4byte unknown
+
+	if (!lse_streamW_write(stream, header, sizeof(header)))
+		return LSE_STREAM_ERROR;
+//END OF HEADER
+
+//stages
+	for (uint8_t j = 0; j < file->numWorlds + file->numSpecials; j++)
+	{
+		for (uint8_t k = 0; k < LSE_DEFAULT_NUM_STAGES; k++)
+		{
+			const lse_stage_entry_t* stage = &file->worlds[j].stages[k];
+			
+			switch (stage->type)
+			{
+			case LSE_STAGE_TYPE_NORMAL:
+			case LSE_STAGE_TYPE_TOADHOUSE_ALBUM: //same as
+			{
+				if ((res = lse_write_stage_normal(&stage->normal, stream)) != LSE_OK)
+					return res;
+				break;
+			}
+
+			case LSE_STAGE_TYPE_MYSTERY_BOX:
+			{
+				if ((res = lse_write_mystery_box(&stage->mysteryBox, stream)) != LSE_OK)
+					return res;
+				break;
+			}
+
+			case LSE_STAGE_TYPE_TOADHOUSE:
+			{
+				if ((res = lse_write_toad_house(&stage->toadHouse, stream)) != LSE_OK)
+					return res;
+				break;
+			}
+			
+			default:
+				break;
+			}
+		}
+	}
+
+	//footer
+	uint8_t footer[0x24] = {0};
+
+	footer[8] = file->lives & 0xFF;
+	footer[9] = file->lives>>8 & 0xFF;
+	footer[10] = file->starcoin & 0xFF;
+	footer[11] = file->starcoin>>8 & 0xFF;
+
+	if (!lse_streamW_write(stream, footer, sizeof(footer)))
+		return LSE_STREAM_ERROR;
+
+	return LSE_OK;
+}
+
 int lse_serialize(uint8_t** mem, size_t* size, const lse_DATA_t* data)
 {
 	int result;
@@ -216,6 +373,16 @@ int lse_serialize(uint8_t** mem, size_t* size, const lse_DATA_t* data)
 		goto ERR;
 	}
 
+	//read file
+	for (uint8_t i = 0; i < LSE_DEFAULT_NUM_FILES; i++)
+	{
+		result = lse_write_file(&data->file[i], &stream);
+		if (result != LSE_OK)
+			goto ERR;
+	}
+
+
+//header
 	*size = lse_streamW_tell(&stream);
 	if (*size < LSE_FILE_SIZE_MIN || *size > LSE_FILE_SIZE_MAX)
 	{

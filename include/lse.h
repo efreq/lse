@@ -85,6 +85,22 @@ typedef struct lse_stage_entry_s lse_stage_entry_t;
 #define LSE_ITEM_BOOMERANG_FLOWER	5
 #define LSE_ITEM_PWING				6
 
+//::progress
+//todo unknown bits
+#define LSE_PROGRESS_FIRST_MOVIE_BIT			(1<<0)
+#define LSE_PROGRESS_FIRST_SPECIAL_BIT			(1<<1)	//not watched movie
+#define LSE_PROGRESS_WORLD1_BIT					(1<<12)
+#define LSE_PROGRESS_WORLD2_BIT					(1<<13)
+#define LSE_PROGRESS_WORLD3_BIT					(1<<14)
+#define LSE_PROGRESS_WORLD4_BIT					(1<<15)
+#define LSE_PROGRESS_SPECIAL7_BIT				(1<<24)
+#define LSE_PROGRESS_SPECIAL8_BIT				(1<<25)
+#define LSE_PROGRESS_FIRST_MYSTERYBOX_BIT		(1<<26) //not watched messgae
+#define LSE_PROGRESS_FIRST_TOADHOUSE_BIT		(1<<27) //not watched messgae
+#define LSE_PROGRESS_FIRST_TOADHOUSE_ALBUM_BIT	(1<<28) //not watched messgae
+#define LSE_PROGRESS_UNLOCK_SPECIAL_BIT			(1<<29) //not watched messgae
+//#define LSE_PROGRESS_UNKNOWN_BIT				(1<<30) //required by data that visited special?
+
 //lse_normal_stage_t
 //::cleared
 #define LSE_STAGE_LOCKED			0
@@ -113,7 +129,6 @@ typedef struct lse_rival_s
 
 /* Normal stage data (size 0x0C) */
 /* A stage has 0x56 bytes data in global directive, They may be streetpath data. its depends on StageList (in romfs) */
-/* TODO: Move to dynamic list, to supporting modded savedata */
 typedef struct lse_normal_stage_s
 {
 	int8_t cleared; //offs 0:locked, 1:not cleared, 2:cleared
@@ -205,6 +220,7 @@ typedef struct lse_FILE_s
 	int8_t powerup; //offs+0x02 0x2B7A Mario's powerUp status, 00:Super 01:Small 02:Fire 03:Raccoon 04:Boomerang 05:Tanooki
 	int8_t pos; //offs+0x03  0x2B7B  (1 - ->): 0 (1 - 1): 1		(8*(world-1))+offs
 	int8_t stockitem; //offs+0x04  0x2B7C 00:None 01:Mushroom 02:Fire 03:Raccoon 04:Tanooki 05:Boomerang 06:P-wing
+	//offs+0x05	0x2B7D
 
 	int8_t isLuigi; //offs+0x09  0x2B81 0:Mario, 1:Luigi
 	/* These data are sharing in all mistery boxes of FILE */
@@ -213,10 +229,7 @@ typedef struct lse_FILE_s
 	uint16_t mbox_starcoin; //offs+0x0C  0x2B84		1<<0 star1, 1<<1 star2, ...
 
 	uint16_t pictures; // offs+0x12 0x2B8A	1<<0 pic1, ... 1<<11 pic12
-	int8_t progress; //offs+0x14 0x2B8C		1<<0 first movie watched, 1<<1 Sworld unlocked, 
-	uint16_t world_progress; //offs+0x15 0x2B8D
-	//uint8_t unknown; //offs+0x17 0x2B8F
-
+	uint32_t progress; //offs+0x14 0x2B8C
 	MiiData mii; //offs+0x18	0x2B90?
 	uint32_t lastsaved; //offs+0x78 0x2BF0 u32 time
 	//4-byte unknown
