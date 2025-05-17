@@ -103,7 +103,7 @@ static inline void lse_streamR_init(lse_StreamR* stream, const uint8_t* src, uin
 
 static inline int lse_streamR_seek(lse_StreamR* stream, uint32_t addr)
 {
-	if (addr >= stream->size)
+	if (addr > stream->size)
 		return 0;
 	stream->byte = addr;
 	return 1;
@@ -116,7 +116,7 @@ static inline int lse_streamR_move(lse_StreamR* stream, int32_t off)
 
 static inline int lse_streamR_read(lse_StreamR* stream, void* buf, uint32_t size)
 {
-	if (stream->byte + size >= stream->size)
+	if (stream->byte + size > stream->size)
 		return 0;
 	
 	memcpy(buf, &stream->src[stream->byte], size);
