@@ -134,7 +134,9 @@ typedef struct lse_normal_stage_s
 	int8_t cleared; //offs 0:locked, 1:not cleared, 2:cleared
 	uint8_t status; //offs+0x01	1<<0 star1, 1<<1 star2, 1<<2 star3, 1<<3 unlock_next_course, 1<<4 Mario_cleared, 1<<5 Luigi_cleared, ..., @note The next course will unlock automatically if this course was locked (exclude last course of world)
 
-	uint32_t misscount; //offs+0x05 missed count. The "retry count" is sum of this variables. max of "retry count" is 99999
+	uint16_t misscount_1; //offs+0x05 missed count before get checkpoint
+	uint16_t misscount_2; //offs+0x07 missed count after get checkpoint
+	//Bug?: misscount will be increasing by 18? when back to title; This bug can be fixed by relaunching game
 	int8_t flagheight; //offs+0x09		64:Golden flag
 	uint16_t time; //offs+0x0A  clear time
 } lse_normal_stage_t;
@@ -146,7 +148,9 @@ typedef struct lse_mystery_box_s
 	int8_t cleared; //offs 0:locked, 1:not cleared, 2:cleared
 	uint8_t status; //offs+0x01		not including starcoin data. it's globalized in a FILE
 
-	uint32_t misscount; //offs+0x05 missed count. The "retry count" is sum of this variables. max of "retry count" is 99999
+	uint16_t misscount_1; //offs+0x05 missed count before get checkpoint
+	uint16_t misscount_2; //offs+0x07 missed count after get checkpoint
+	//Bug?: misscount will be increasing by 18? when back to title; This bug can be fixed by relaunching game
 
 	int8_t nextbox; //offs+0x6A	index of next mbox, random?
 

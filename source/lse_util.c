@@ -51,7 +51,15 @@ uint32_t lse_stage_get_retry_count(const lse_DATA_t* data, uint8_t i)
 		for (uint8_t k = 0; k < data->file[i].worlds[j].numStages; k++)
 		{
 			if (data->file[i].worlds[j].stages[k].type == LSE_STAGE_TYPE_NORMAL)
-				ret += data->file[i].worlds[j].stages[k].normal.misscount;
+			{
+				ret += data->file[i].worlds[j].stages[k].normal.misscount_1;
+				ret += data->file[i].worlds[j].stages[k].normal.misscount_2;				
+			}
+			else if (data->file[i].worlds[j].stages[k].type == LSE_STAGE_TYPE_MYSTERY_BOX)
+			{
+				ret += data->file[i].worlds[j].stages[k].mysteryBox.misscount_1;
+				ret += data->file[i].worlds[j].stages[k].mysteryBox.misscount_2;				
+			}
 		}
 	}
 	

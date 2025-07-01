@@ -188,10 +188,10 @@ int lse_write_stage_normal(const lse_normal_stage_t* stage, lse_StreamW* stream)
 	stage_buf[0] = stage->cleared;
 	stage_buf[1] = stage->status;
 
-	stage_buf[5] = stage->misscount & 0xFF;
-	stage_buf[6] = stage->misscount>>8 & 0xFF;
-	stage_buf[7] = stage->misscount>>16 & 0xFF;
-	stage_buf[8] = stage->misscount>>24 & 0xFF;
+	stage_buf[5] = stage->misscount_1 & 0xFF;
+	stage_buf[6] = stage->misscount_1>>8 & 0xFF;
+	stage_buf[7] = stage->misscount_2 & 0xFF;
+	stage_buf[8] = stage->misscount_2>>8 & 0xFF;
 	stage_buf[9] = stage->flagheight;
 	stage_buf[10] = stage->time & 0xFF;
 	stage_buf[11] = stage->time>>8 & 0xFF;
@@ -209,10 +209,10 @@ int lse_write_mystery_box(const lse_mystery_box_t* stage, lse_StreamW* stream)
 	stage_buf[0] = stage->cleared;
 	stage_buf[1] = stage->status;
 
-	stage_buf[5] = stage->misscount & 0xFF;
-	stage_buf[6] = stage->misscount>>8 & 0xFF;
-	stage_buf[7] = stage->misscount>>16 & 0xFF;
-	stage_buf[8] = stage->misscount>>24 & 0xFF;
+	stage_buf[5] = stage->misscount_1 & 0xFF;
+	stage_buf[6] = stage->misscount_1>>8 & 0xFF;
+	stage_buf[7] = stage->misscount_2 & 0xFF;
+	stage_buf[8] = stage->misscount_2>>8 & 0xFF;
 
 	stage_buf[0x6A] = stage->nextbox;
 	

@@ -197,7 +197,8 @@ int lse_read_stage_normal(lse_normal_stage_t* stage, lse_StreamR* stream)
 	stage->cleared = stage_buf[0];
 	stage->status = stage_buf[1];
 
-	stage->misscount = stage_buf[5] | stage_buf[6]<<8 | stage_buf[7]<<16 | stage_buf[8]<<24;
+	stage->misscount_1 = stage_buf[5] | stage_buf[6]<<8;
+	stage->misscount_2 = stage_buf[7] | stage_buf[8]<<8;
 	stage->flagheight = stage_buf[9];
 	stage->time = stage_buf[10] | stage_buf[11]<<8;
 
@@ -213,7 +214,8 @@ int lse_read_mystery_box(lse_mystery_box_t* stage, lse_StreamR* stream)
 	stage->cleared = stage_buf[0];
 	stage->status = stage_buf[1];
 
-	stage->misscount = stage_buf[5] | stage_buf[6]<<8 | stage_buf[7]<<16 | stage_buf[8]<<24;
+	stage->misscount_1 = stage_buf[5] | stage_buf[6]<<8;
+	stage->misscount_2 = stage_buf[7] | stage_buf[8]<<8;
 	
 	stage->nextbox = stage_buf[0x6A];
 
