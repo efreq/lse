@@ -108,8 +108,8 @@ typedef struct lse_stage_entry_s lse_stage_entry_t;
 #define LSE_STAGE_CLEARED			2
 
 //::status
-#define LES_STAGE_STATUS_STARCOIN1_BIT		(1<<0)
-#define LES_STAGE_STATUS_STARCOIN2_BIT		(1<<1)
+#define LSE_STAGE_STATUS_STARCOIN1_BIT		(1<<0)
+#define LSE_STAGE_STATUS_STARCOIN2_BIT		(1<<1)
 #define LSE_STAGE_STATUS_STARCOIN3_BIT		(1<<2)
 ///@note The next course will unlock automatically if this course was locked (exclude last course of world)
 #define LSE_STAGE_STATUS_UNLOCK_NEXT_BIT	(1<<3)
