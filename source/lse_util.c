@@ -41,12 +41,12 @@ int lse_stage_at(lse_stage_entry_t** out, lse_FILE_t* file, uint8_t stageType, u
 
 uint32_t lse_stage_get_retry_count(const lse_DATA_t* data, uint8_t i)
 {
-	if (!data || i > 3)
+	if (!data || i >= 3)
 		return 0;
 	
 	uint32_t ret = 0;
 
-	for (uint8_t j = 0; j < data->file[i].numWorlds; j++)
+	for (uint8_t j = 0; j < data->file[i].numWorlds + data->file[i].numSpecials; j++)
 	{
 		for (uint8_t k = 0; k < data->file[i].worlds[j].numStages; k++)
 		{
